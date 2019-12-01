@@ -9,6 +9,7 @@ black = "*"
 [packages]
 sympy = "*"
 jupyter = "*"
+numpy = "*"
 
 [requires]
 python_version = "3"
