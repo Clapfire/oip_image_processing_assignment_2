@@ -38,10 +38,10 @@ class Particle:
     def update(self, globalBest: list):
         """Update the particle's state during each iteration.
 
-    Args:
+        Args:
 
-      globalBest (number list): Describes the configuration for the previously known global best.
-    """
+        globalBest (number list): Describes the configuration for the previously known global best.
+        """
         try:
             vNext: list = []
             xNext: list = []
@@ -75,10 +75,10 @@ class Particle:
     def fitness(self):
         """Returns the function value of the current position.
     
-    Returns:
+        Returns:
 
-      fitness (float): The function value of the current position.
-    """
+        fitness (float): The function value of the current position.
+        """
         return self.func(*self.x)
 
 
