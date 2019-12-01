@@ -1,18 +1,20 @@
 import random
 import math
 import sympy as sp
+from sympy.utilities.lambdify import implemented_function
+
 
 class Particle:
     def __init__(
         self,
-        func: function,
+        func,
         x0: list,
         aCognitive: float = 2,
         aSocial: float = 2,
         inertia: float = 1,
     ):
         # The mathematical function to calculate the value for a given configuration.
-        self.func: function = func
+        self.func = func
 
         # The number of parameters to be optimized.
         self.dimension: int = len(x0)
@@ -32,7 +34,7 @@ class Particle:
         self.inertia: float = inertia
 
         # The personal best.
-        self.bestValue: float = self.fitness()
+        self.bestValue: float = self.func(*self.x)
         self.bestPosition: list = self.x
 
     def update(self, globalBest: list):
@@ -72,20 +74,11 @@ class Particle:
             )
             raise IndexError
 
-    def fitness(self):
-        """Returns the function value of the current position.
-    
-        Returns:
-
-        fitness (float): The function value of the current position.
-        """
-        return self.func(*self.x)
-
 
 class ParticleSwarm:
     def __init__(
         self,
-        func: function,
+        func,
         coordsMin: list,
         coordsMax: list,
         populationSize: int = 50,
@@ -93,7 +86,7 @@ class ParticleSwarm:
     ):
         try:
             # Define member variables.
-            self.func: function = func
+            self.func = func
             self.dimensions: int = len(coordsMin)
             self.coordsMin: list = coordsMin
             self.coordsMin: list = coordsMax
@@ -142,7 +135,7 @@ class ParticleSwarm:
 
 def ackley():
     x, y = sp.symbols("x y")
-    f = sp.utilities.lambdify.implemented_function(
+    f = implemented_function(
         "f",
         lambda x, y: math.exp(1)
         + 20
