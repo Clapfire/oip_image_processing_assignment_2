@@ -22,10 +22,10 @@ class Particle:
         self.aCognitive: float = aCognitive
         self.aSocial: float = aSocial
 
-        # Generate random initial velocities from 0 to 1.
+        # Generate random initial velocities from -1 to 1.
         v0 = []
         for i in range(self.dimension):
-            v0.append(random.uniform(0, 1))
+            v0.append(random.uniform(-1, 1))
 
         # The current state of the system.
         self.x: list = x0
@@ -33,7 +33,7 @@ class Particle:
         self.inertia: float = inertia
 
         # The personal best.
-        self.bestValue: float = self.func(*self.x)
+        self.bestValue: float = self.func(*self.x)[0]
         self.bestPosition: list = self.x
 
     def update(self, globalBest: list):
@@ -53,7 +53,7 @@ class Particle:
 
                 vNext.append(
                     self.inertia * self.v[i]
-                    + self.aCognitive * (self.best[i] - self.x[i]) * r1
+                    + self.aCognitive * (self.bestPosition[i] - self.x[i]) * r1
                     + self.aSocial * (globalBest[i] - self.x[i]) * r2
                 )
                 xNext.append(self.x[i] + vNext[i])
@@ -61,7 +61,7 @@ class Particle:
             self.x: list = xNext
             self.v: list = vNext
 
-            currentFitness: float = self.func(*self.x)
+            currentFitness: float = self.func(*self.x)[0]
 
             if currentFitness <= self.bestValue:
                 self.bestValue: float = currentFitness
@@ -83,18 +83,26 @@ class ParticleSwarm:
         populationSize: int = 50,
         initStrategy: str = "random",
     ):
+        # DEBUG
+        self.coordinatesX = []
+        self.coordinatesY = []
+        self.coordinatesZ = []
         try:
             # Define member variables.
-            self.func = func
+            x, y = sp.symbols("x y")
+            self.func = sp.lambdify((x, y), func)
             self.dimensions: int = len(coordsMin)
             self.coordsMin: list = coordsMin
-            self.coordsMin: list = coordsMax
+            self.coordsMax: list = coordsMax
             self.populationSize: int = populationSize
             self.particles: list = []
 
             # Particle instances of the particle swarm.
             for i in range(populationSize):
-                x0 = [random.uniform(0, 1) for i in range(self.dimensions)]
+                x0 = [
+                    random.uniform(self.coordsMin[j], self.coordsMax[j])
+                    for j in range(self.dimensions)
+                ]
                 self.particles.append(Particle(self.func, x0))
 
                 if i == 0 or self.particles[i].bestValue < self.bestValue:
@@ -107,7 +115,7 @@ class ParticleSwarm:
             )
             raise IndexError
 
-    def run(self, hysteresis: float = 1e-9, iterations: int = 100):
+    def run(self, hysteresis: float = 1e-3, iterations: int = 100):
         bestValuePrevious = self.bestValue
         delta = hysteresis + 1
         iteration = 0
@@ -130,6 +138,16 @@ class ParticleSwarm:
                 iteration = iteration + 1
             else:
                 iteration = 0
+
+            # DEBUG
+            self.coordinatesX.append(self.bestPosition[0])
+            self.coordinatesY.append(self.bestPosition[1])
+            self.coordinatesZ.append(self.bestValue)
+            # print(
+            #     "Position: {x}, Value: {fitness}".format(
+            #         x=self.bestPosition, fitness=self.bestValue
+            #     )
+            # )
 
 
 def ackley():
