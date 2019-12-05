@@ -11,6 +11,7 @@ sympy = "*"
 jupyter = "*"
 numpy = "*"
 matplotlib = "*"
+ipympl = "*"
 
 [requires]
 python_version = "3"
