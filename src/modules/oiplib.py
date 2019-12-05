@@ -1,7 +1,6 @@
 import random
 import math
 import sympy as sp
-from sympy.utilities.lambdify import implemented_function
 
 
 class Particle:
@@ -135,12 +134,11 @@ class ParticleSwarm:
 
 def ackley():
     x, y = sp.symbols("x y")
-    f = implemented_function(
-        "f",
-        lambda x, y: math.exp(1)
+    f = sp.Function('f')
+    f = (sp.exp(1)
         + 20
-        - 20 * math.exp(-0.2 * math.sqrt(0.5 * (x * x + y * y)))
-        - math.exp(0.5 * (math.cos(2 * math.pi * x) + math.cos(2 * math.pi * y))),
+        - 20 * sp.exp(-0.2 * sp.sqrt(0.5 * (x * x + y * y)))
+        - sp.exp(0.5 * (sp.cos(2 * sp.pi * x) + sp.cos(2 * sp.pi * y))),
     )
-    return sp.lambdify([x, y], f(x, y))
+    return f, x, y
 
