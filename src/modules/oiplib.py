@@ -10,8 +10,13 @@ class Particle:
         x0: list,
         aCognitive: float = 2,
         aSocial: float = 2,
-        inertia: float = 1,
+        inertia: float = 0.5,
     ):
+        # DEBUG
+        self.coordinatesX = []
+        self.coordinatesY = []
+        self.coordinatesZ = []
+
         # The mathematical function to calculate the value for a given configuration.
         self.func = func
 
@@ -67,6 +72,11 @@ class Particle:
                 self.bestValue: float = currentFitness
                 self.bestPosition: list = self.x
 
+            # DEBUG
+            self.coordinatesX.append(self.bestPosition[0])
+            self.coordinatesY.append(self.bestPosition[1])
+            self.coordinatesZ.append(self.bestValue)
+
         except IndexError:
             print(
                 "WARN: Dimensions of global best must match amount of parameters to be optimized."
@@ -115,12 +125,12 @@ class ParticleSwarm:
             )
             raise IndexError
 
-    def run(self, hysteresis: float = 1e-3, iterations: int = 100):
-        bestValuePrevious = self.bestValue
+    def run(self, hysteresis: float = 1e-9, iterations: int = 100):
         delta = hysteresis + 1
         iteration = 0
 
         while iteration < iterations:
+            bestValuePrevious = self.bestValue
             # Update the particle position and the particle velocities.
             for particle in self.particles:
                 particle.update(self.bestPosition)
@@ -138,16 +148,10 @@ class ParticleSwarm:
                 iteration = iteration + 1
             else:
                 iteration = 0
-
-            # DEBUG
-            self.coordinatesX.append(self.bestPosition[0])
-            self.coordinatesY.append(self.bestPosition[1])
-            self.coordinatesZ.append(self.bestValue)
-            # print(
-            #     "Position: {x}, Value: {fitness}".format(
-            #         x=self.bestPosition, fitness=self.bestValue
-            #     )
-            # )
+                # DEBUG
+                self.coordinatesX.append(self.bestPosition[0])
+                self.coordinatesY.append(self.bestPosition[1])
+                self.coordinatesZ.append(self.bestValue)
 
 
 def ackley():
