@@ -25,7 +25,7 @@ class Particle:
         # Generate random initial velocities from 0 to 1.
         v0 = []
         for i in range(self.dimension):
-            v0.append(random.uniform())
+            v0.append(random.uniform(0, 1))
 
         # The current state of the system.
         self.x: list = x0
@@ -48,8 +48,8 @@ class Particle:
             xNext: list = []
 
             for i in range(self.dimension):
-                r1: float = random.uniform()
-                r2: float = random.uniform()
+                r1: float = random.uniform(0, 1)
+                r2: float = random.uniform(0, 1)
 
                 vNext.append(
                     self.inertia * self.v[i]
@@ -94,7 +94,7 @@ class ParticleSwarm:
 
             # Particle instances of the particle swarm.
             for i in range(populationSize):
-                x0 = [random.uniform() for i in range(self.dimensions)]
+                x0 = [random.uniform(0, 1) for i in range(self.dimensions)]
                 self.particles.append(Particle(self.func, x0))
 
                 if i == 0 or self.particles[i].bestValue < self.bestValue:
@@ -134,8 +134,9 @@ class ParticleSwarm:
 
 def ackley():
     x, y = sp.symbols("x y")
-    f = sp.Function('f')
-    f = (sp.exp(1)
+    f = sp.Function("f")
+    f = (
+        sp.exp(1)
         + 20
         - 20 * sp.exp(-0.2 * sp.sqrt(0.5 * (x * x + y * y)))
         - sp.exp(0.5 * (sp.cos(2 * sp.pi * x) + sp.cos(2 * sp.pi * y))),
