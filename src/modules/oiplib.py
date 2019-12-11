@@ -11,6 +11,7 @@ class Particle:
         aCognitive: float = 2,
         aSocial: float = 2,
         inertia: float = 0.5,
+        dataset = None,
     ):
         # DEBUG
         self.coordinatesX = []
@@ -19,6 +20,9 @@ class Particle:
 
         # The mathematical function to calculate the value for a given configuration.
         self.func = func
+        
+        # Dataset from which the fitness function compares func to
+        self.dataset = dataset
 
         # The number of parameters to be optimized.
         self.dimension: int = len(x0)
@@ -38,7 +42,10 @@ class Particle:
         self.inertia: float = inertia
 
         # The personal best.
-        self.bestValue: float = self.func(*self.x)[0]
+        if self.dataset is not None:
+            self.bestValue: float = self.func(*self.x, self.dataset)
+        else:
+            self.bestValue: float = self.func(*self.x)
         self.bestPosition: list = self.x
 
     def update(self, globalBest: list):
@@ -66,7 +73,10 @@ class Particle:
             self.x: list = xNext
             self.v: list = vNext
 
-            currentFitness: float = self.func(*self.x)[0]
+            if self.dataset is not None:
+                currentFitness: float = self.func(*self.x, self.dataset)
+            else:
+                currentFitness: float = self.func(*self.x)
 
             if currentFitness <= self.bestValue:
                 self.bestValue: float = currentFitness
@@ -92,6 +102,7 @@ class ParticleSwarm:
         coordsMax: list,
         populationSize: int = 50,
         initStrategy: str = "random",
+        dataset = None,
     ):
         # DEBUG
         self.coordinatesX = []
@@ -99,13 +110,15 @@ class ParticleSwarm:
         self.coordinatesZ = []
         try:
             # Define member variables.
-            x, y = sp.symbols("x y")
-            self.func = sp.lambdify((x, y), func)
+            #x, y = sp.symbols("x y")
+            #self.func = sp.lambdify((x, y), func)
+            self.func = func
             self.dimensions: int = len(coordsMin)
             self.coordsMin: list = coordsMin
             self.coordsMax: list = coordsMax
             self.populationSize: int = populationSize
             self.particles: list = []
+            self.dataset = dataset
 
             # Particle instances of the particle swarm.
             for i in range(populationSize):
@@ -113,7 +126,8 @@ class ParticleSwarm:
                     random.uniform(self.coordsMin[j], self.coordsMax[j])
                     for j in range(self.dimensions)
                 ]
-                self.particles.append(Particle(self.func, x0))
+
+                self.particles.append(Particle(self.func, x0, dataset = self.dataset ))
 
                 if i == 0 or self.particles[i].bestValue < self.bestValue:
                     self.bestPosition = self.particles[i].bestPosition
@@ -125,7 +139,7 @@ class ParticleSwarm:
             )
             raise IndexError
 
-    def run(self, hysteresis: float = 1e-9, iterations: int = 100):
+    def run(self, hysteresis: float = 1e-6, iterations: int = 25 , print_best = False):
         delta = hysteresis + 1
         iteration = 0
 
@@ -141,7 +155,10 @@ class ParticleSwarm:
                     self.bestPosition = particle.bestPosition
 
             # Calculate the change in global best.
-            delta = bestValuePrevious - self.bestValue
+            try:
+                delta = bestValuePrevious - self.bestValue
+            except TypeError:
+                delta = bestValuePrevious - self.bestValue[0]
 
             # Check if error is within hysteresis.
             if delta <= hysteresis:
@@ -152,6 +169,10 @@ class ParticleSwarm:
                 self.coordinatesX.append(self.bestPosition[0])
                 self.coordinatesY.append(self.bestPosition[1])
                 self.coordinatesZ.append(self.bestValue)
+                if print_best == True:
+                    print(self.bestValue)
+            
+            
 
 
 def ackley():
@@ -163,5 +184,30 @@ def ackley():
         - 20 * sp.exp(-0.2 * sp.sqrt(0.5 * (x * x + y * y)))
         - sp.exp(0.5 * (sp.cos(2 * sp.pi * x) + sp.cos(2 * sp.pi * y))),
     )
+    
     return f, x, y
+
+f, x, y = ackley()
+ackley_lambdified = sp.lambdify([x,y], f)
+
+def ackley_function(x,y):
+    return  ackley_lambdified(x,y)[0]
+
+def fitness_function(a,b,dataset):
+    fit = 0
+    for i in range(len(dataset)):
+        #x value
+        x = dataset[i,0]
+
+        #y value
+        y = dataset[i,1]
+
+        #z value
+        z = dataset[i,2]
+        
+        r = z - ((a-x)**2 + b*(y-x**2)**2)
+        
+        fit = r**2 + fit
+        
+    return fit
 
