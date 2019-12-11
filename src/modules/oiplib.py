@@ -7,11 +7,11 @@ class Particle:
     def __init__(
         self,
         func,
-        dataset,
         x0: list,
         aCognitive: float = 2,
         aSocial: float = 2,
         inertia: float = 0.5,
+        dataset = None,
     ):
         # DEBUG
         self.coordinatesX = []
@@ -42,7 +42,10 @@ class Particle:
         self.inertia: float = inertia
 
         # The personal best.
-        self.bestValue: float = self.func(*self.x, self.dataset)
+        if self.dataset is not None:
+            self.bestValue: float = self.func(*self.x, self.dataset)
+        else:
+            self.bestValue: float = self.func(*self.x)
         self.bestPosition: list = self.x
 
     def update(self, globalBest: list):
@@ -70,7 +73,10 @@ class Particle:
             self.x: list = xNext
             self.v: list = vNext
 
-            currentFitness: float = self.func(*self.x, self.dataset)
+            if self.dataset is not None:
+                currentFitness: float = self.func(*self.x, self.dataset)
+            else:
+                currentFitness: float = self.func(*self.x)
 
             if currentFitness <= self.bestValue:
                 self.bestValue: float = currentFitness
@@ -92,11 +98,11 @@ class ParticleSwarm:
     def __init__(
         self,
         func,
-        dataset,
         coordsMin: list,
         coordsMax: list,
         populationSize: int = 50,
         initStrategy: str = "random",
+        dataset = None,
     ):
         # DEBUG
         self.coordinatesX = []
@@ -107,12 +113,12 @@ class ParticleSwarm:
             #x, y = sp.symbols("x y")
             #self.func = sp.lambdify((x, y), func)
             self.func = func
-            self.dataset = dataset
             self.dimensions: int = len(coordsMin)
             self.coordsMin: list = coordsMin
             self.coordsMax: list = coordsMax
             self.populationSize: int = populationSize
             self.particles: list = []
+            self.dataset = dataset
 
             # Particle instances of the particle swarm.
             for i in range(populationSize):
@@ -120,7 +126,8 @@ class ParticleSwarm:
                     random.uniform(self.coordsMin[j], self.coordsMax[j])
                     for j in range(self.dimensions)
                 ]
-                self.particles.append(Particle(self.func, self.dataset, x0))
+
+                self.particles.append(Particle(self.func, x0, dataset = self.dataset ))
 
                 if i == 0 or self.particles[i].bestValue < self.bestValue:
                     self.bestPosition = self.particles[i].bestPosition
@@ -148,7 +155,10 @@ class ParticleSwarm:
                     self.bestPosition = particle.bestPosition
 
             # Calculate the change in global best.
-            delta = bestValuePrevious - self.bestValue
+            try:
+                delta = bestValuePrevious - self.bestValue
+            except TypeError:
+                delta = bestValuePrevious - self.bestValue[0]
 
             # Check if error is within hysteresis.
             if delta <= hysteresis:
@@ -174,8 +184,14 @@ def ackley():
         - 20 * sp.exp(-0.2 * sp.sqrt(0.5 * (x * x + y * y)))
         - sp.exp(0.5 * (sp.cos(2 * sp.pi * x) + sp.cos(2 * sp.pi * y))),
     )
+    
     return f, x, y
 
+f, x, y = ackley()
+ackley_lambdified = sp.lambdify([x,y], f)
+
+def ackley_function(x,y):
+    return  ackley_lambdified(x,y)[0]
 
 def fitness_function(a,b,dataset):
     fit = 0
