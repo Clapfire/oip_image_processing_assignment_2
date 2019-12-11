@@ -38,7 +38,7 @@ class Particle:
         self.inertia: float = inertia
 
         # The personal best.
-        self.bestValue: float = self.func(*self.x)[0]
+        self.bestValue: float = self.func(*self.x)
         self.bestPosition: list = self.x
 
     def update(self, globalBest: list):
@@ -66,7 +66,7 @@ class Particle:
             self.x: list = xNext
             self.v: list = vNext
 
-            currentFitness: float = self.func(*self.x)[0]
+            currentFitness: float = self.func(*self.x)
 
             if currentFitness <= self.bestValue:
                 self.bestValue: float = currentFitness
@@ -99,8 +99,9 @@ class ParticleSwarm:
         self.coordinatesZ = []
         try:
             # Define member variables.
-            x, y = sp.symbols("x y")
-            self.func = sp.lambdify((x, y), func)
+            #x, y = sp.symbols("x y")
+            #self.func = sp.lambdify((x, y), func)
+            self.func = func
             self.dimensions: int = len(coordsMin)
             self.coordsMin: list = coordsMin
             self.coordsMax: list = coordsMax
@@ -164,4 +165,23 @@ def ackley():
         - sp.exp(0.5 * (sp.cos(2 * sp.pi * x) + sp.cos(2 * sp.pi * y))),
     )
     return f, x, y
+
+
+def fitness_function(a,b):
+    fit = 0
+    for i in range(len(dataset)):
+        #x value
+        x = dataset[i,0]
+
+        #y value
+        y = dataset[i,1]
+
+        #z value
+        z = dataset[i,2]
+        
+        r = z - ((a-x)**2 + b*(y-x**2)**2)
+        
+        fit = r**2 + fit
+        
+    return fit
 
