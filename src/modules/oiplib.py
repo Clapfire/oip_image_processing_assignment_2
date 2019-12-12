@@ -1,5 +1,4 @@
 import random
-import math
 import sympy as sp
 
 
@@ -10,8 +9,8 @@ class Particle:
         x0: list,
         aCognitive: float = 2,
         aSocial: float = 2,
-        inertia: float = 0.5,
-        dataset = None,
+        inertia: float = 0.1,
+        dataset=None,
     ):
         # DEBUG
         self.coordinatesX = []
@@ -20,7 +19,7 @@ class Particle:
 
         # The mathematical function to calculate the value for a given configuration.
         self.func = func
-        
+
         # Dataset from which the fitness function compares func to
         self.dataset = dataset
 
@@ -102,7 +101,7 @@ class ParticleSwarm:
         coordsMax: list,
         populationSize: int = 50,
         initStrategy: str = "random",
-        dataset = None,
+        dataset=None,
     ):
         # DEBUG
         self.coordinatesX = []
@@ -110,8 +109,8 @@ class ParticleSwarm:
         self.coordinatesZ = []
         try:
             # Define member variables.
-            #x, y = sp.symbols("x y")
-            #self.func = sp.lambdify((x, y), func)
+            # x, y = sp.symbols("x y")
+            # self.func = sp.lambdify((x, y), func)
             self.func = func
             self.dimensions: int = len(coordsMin)
             self.coordsMin: list = coordsMin
@@ -127,7 +126,7 @@ class ParticleSwarm:
                     for j in range(self.dimensions)
                 ]
 
-                self.particles.append(Particle(self.func, x0, dataset = self.dataset ))
+                self.particles.append(Particle(self.func, x0, dataset=self.dataset))
 
                 if i == 0 or self.particles[i].bestValue < self.bestValue:
                     self.bestPosition = self.particles[i].bestPosition
@@ -139,7 +138,7 @@ class ParticleSwarm:
             )
             raise IndexError
 
-    def run(self, hysteresis: float = 1e-6, iterations: int = 25 , print_best = False):
+    def run(self, hysteresis: float = 1e-6, iterations: int = 25, print_best=False):
         delta = hysteresis + 1
         iteration = 0
 
@@ -171,8 +170,6 @@ class ParticleSwarm:
                 self.coordinatesZ.append(self.bestValue)
                 if print_best == True:
                     print(self.bestValue)
-            
-            
 
 
 def ackley():
@@ -184,30 +181,33 @@ def ackley():
         - 20 * sp.exp(-0.2 * sp.sqrt(0.5 * (x * x + y * y)))
         - sp.exp(0.5 * (sp.cos(2 * sp.pi * x) + sp.cos(2 * sp.pi * y))),
     )
-    
+
     return f, x, y
 
+
 f, x, y = ackley()
-ackley_lambdified = sp.lambdify([x,y], f)
+ackley_lambdified = sp.lambdify([x, y], f)
 
-def ackley_function(x,y):
-    return  ackley_lambdified(x,y)[0]
 
-def fitness_function(a,b,dataset):
+def ackley_function(x, y):
+    return ackley_lambdified(x, y)[0]
+
+
+def fitness_function(a, b, dataset):
     fit = 0
     for i in range(len(dataset)):
-        #x value
-        x = dataset[i,0]
+        # x value
+        x = dataset[i, 0]
 
-        #y value
-        y = dataset[i,1]
+        # y value
+        y = dataset[i, 1]
 
-        #z value
-        z = dataset[i,2]
-        
-        r = z - ((a-x)**2 + b*(y-x**2)**2)
-        
-        fit = r**2 + fit
-        
+        # z value
+        z = dataset[i, 2]
+
+        r = z - ((a - x) ** 2 + b * (y - x ** 2) ** 2)
+
+        fit = r ** 2 + fit
+
     return fit
 
