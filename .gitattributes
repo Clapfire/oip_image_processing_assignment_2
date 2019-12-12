@@ -6,3 +6,4 @@
 *.jpeg diff=lfs merge=lfs filter=lfs -text
 *.jpg diff=lfs merge=lfs filter=lfs -text
 *.png diff=lfs merge=lfs filter=lfs -text
+*.pdf diff=lfs merge=lfs filter=lfs -text
